@@ -17,8 +17,8 @@
                         <el-input v-model="ruleForm.password" type="password"></el-input>
                     </el-form-item>
                     <el-form-item>
-                        <el-button type="primary" @click="submitForm('ruleForm')">注册</el-button>
-                        <el-button type="primary" @click="submitForm('ruleForm')">登录</el-button>
+                        <el-button type="primary" @click="register('ruleForm')">注册</el-button>
+                        <el-button type="primary" @click="login('ruleForm')">登录</el-button>
                         <el-button @click="resetForm('ruleForm')">重置</el-button>
                     </el-form-item>
                 </el-form>
@@ -36,7 +36,7 @@
     components: {},
     data() {
       return {
-        isLogin: true,
+        isLogin: "",
         ruleForm: {
           userName: "",
           password: ""
@@ -56,7 +56,6 @@
       if (!commonUtil.isEmpty(loginFlag)) {
         this.isLogin = loginFlag
       }
-      console.log("this.isLogin:", this.isLogin)
     },
     watch: {},
     methods: {
@@ -64,18 +63,38 @@
         return this.$route.query[paramName];
       },
 
-      // 提交
-      submitForm(formName) {
+      register(formName){
         this.$refs[formName].validate(valid => {
           if (valid) {
             const _this = this
-            let uri = "/api/register";
+            let uri = "/api/register";;
             let message = "注册成功";
-            // 登录使用login URI
-            if (_this.isLogin) {
-              uri = "/api/login";
-              message = "登录成功";
-            }
+            this.$http
+              .post(uri, _this.ruleForm)
+              .then(res => {
+                const token = res.headers["authorization"];
+                _this.$store.commit("SET_TOKEN", token);
+                _this.$store.commit("SET_USER_INFO", res.data.data);
+                // 弹窗异常信息
+                Element.Message({
+                  message: message,
+                  type: 'success',
+                  duration: 3 * 1000
+                })
+                // 注册成功跳转到博客列表首页
+                _this.$router.push("/blogs");
+              });
+          } else {
+            return false;
+          }
+        });
+      },
+      login(formName){
+        this.$refs[formName].validate(valid => {
+          if (valid) {
+            const _this = this
+            let uri = "/api/login";
+            let message = "登录成功";
             this.$http
               .post(uri, _this.ruleForm)
               .then(res => {

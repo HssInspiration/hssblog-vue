@@ -9,7 +9,7 @@
             <el-link @click="toIndex">主页</el-link>
             <el-divider direction="vertical"></el-divider>
             <span>
-              <el-link type="success" href="/blog/add" :disabled="!hasLogin">发表文章</el-link>
+              <el-link type="success" @click="add" :disabled="!hasLogin">发表文章</el-link>
             </span>
             <el-divider direction="vertical"></el-divider>
             <span v-show="!hasLogin">
@@ -43,18 +43,21 @@
       }
     },
     methods: {
+      add(){
+        this.$router.push({path: "/blog/add"});
+      },
       // 主页
       toIndex() {
         this.$router.push({path: "/blogs"});
       },
       // 注册
       register() {
-        this.$router.push({path: "/login", query: {isLogin: false}});
+        this.$router.push({path: "/login", query: {isLogin: "0"}});
       },
 
       // 登录
       login() {
-        this.$router.push({path: "/login", query: {isLogin: true}});
+        this.$router.push({path: "/login", query: {isLogin: "1"}});
       },
 
       logout() {
@@ -71,7 +74,7 @@
       }
     },
     created() {
-      if (this.$store.getters.getUser.userName) {
+      if (this.$store.getters.getUser.userName || this.$store.getters.getUser.id) {
         this.user.userName = this.$store.getters.getUser.userName
         this.user.avatar = this.$store.getters.getUser.avatar
         this.hasLogin = true
