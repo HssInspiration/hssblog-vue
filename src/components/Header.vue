@@ -17,7 +17,7 @@
             </span>
             <el-divider direction="vertical"></el-divider>
             <span v-show="!hasLogin">
-                <el-link type="primary" @click="login">登陆</el-link>
+                <el-link type="primary" @click="login">登录</el-link>
             </span>
             <span v-show="hasLogin">
               <el-link type="danger" @click="logout">退出</el-link>
@@ -59,7 +59,7 @@
 
       logout() {
         const _this = this
-        // console.log("localStorage.getItem(\"token\"):" + localStorage.getItem("token"));
+        console.log("localStorage.getItem(\"token\"):" + localStorage.getItem("token"));
         this.$http.get('/api/logout', {
           headers: {
             "Authorization": localStorage.getItem("token")

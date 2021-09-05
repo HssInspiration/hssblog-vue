@@ -16,7 +16,7 @@
                 </el-form-item>
 
                 <el-form-item>
-                    <el-button type="primary" @click="submitForm('ruleForm')">立即创建</el-button>
+                    <el-button type="primary" @click="submitForm('ruleForm')">提交</el-button>
                     <el-button @click="resetForm('ruleForm')">重置</el-button>
                 </el-form-item>
             </el-form>
@@ -63,7 +63,6 @@
                 "Authorization": localStorage.getItem("token")
               }
             }).then(res => {
-              console.log(res)
               _this.$alert('操作成功', '提示', {
                 confirmButtonText: '确定',
                 callback: action => {
