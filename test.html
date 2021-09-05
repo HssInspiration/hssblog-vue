@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<script src="https://cdn.bootcdn.net/ajax/libs/jquery/3.5.1/jquery.js"></script>
+<body>
+<div id="btn"></div>
+<input type="text" value="value" id="test"></input>
+<script type="application/javascript">
+    var test = $("#test").val();
+    console.log("test:", test);
+    $.ajax({
+        url: "http://neteasecloudmusicapi.zhaoboy.com/song/url?id=478507889",
+        async: true,
+        success: function (result) {
+            console.log("success:", result)
+            if(result.code === 200){
+                console.log(result.data[0].url)
+            }
+        },
+        error:function (e) {
+            console.log("error")
+            console.log(e)
+        }
+    });
+</script>
+</body>
+</html>

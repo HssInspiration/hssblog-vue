@@ -1,29 +1,47 @@
 import Vue from 'vue'
 import VueRouter from 'vue-router'
-import Home from '../views/Home.vue'
+import login from '../views/Login.vue'
+import blogs from '../views/Blogs.vue'
+import blogEdit from '../views/BlogEdit.vue'
+import blogDetail from '../views/BlogDetail.vue'
 
 Vue.use(VueRouter)
 
-  const routes = [
-  {
-    path: '/',
-    name: 'Home',
-    component: Home
-  },
-  {
-    path: '/about',
-    name: 'About',
-    // route level code-splitting
-    // this generates a separate chunk (about.[hash].js) for this route
-    // which is lazy-loaded when the route is visited.
-    component: () => import(/* webpackChunkName: "about" */ '../views/About.vue')
-  }
-]
+const routes = [{
+  path: '/',
+  name: 'index',
+  component: blogs
+}, {
+  path: '/login',
+  name: 'login',
+  component: login
+}, {
+  path: '/blog/add',
+  name: 'blogEdit',
+  component: blogEdit
+}, {
+  path: '/blogs',
+  name: 'blogs',
+  component: blogs
+}, {
+  path: '/blog/:id',
+  name: 'blogDetail',
+  component: blogDetail
+}, {
+  path: '/blog/:blogId/edit',
+  name: 'blogEdit',
+  component: blogEdit
+}]
 
 const router = new VueRouter({
-  mode: 'history',
-  base: process.env.BASE_URL,
+  // mode: 'history',
+  // base: process.env.BASE_URL,
   routes
 })
+const originalPush = VueRouter.prototype.push
+VueRouter.prototype.push = function push(location) {
+  // 捕获路由在当前页跳转到当前页的异常
+  return originalPush.call(this, location).catch(error => error)
+}
 
 export default router
