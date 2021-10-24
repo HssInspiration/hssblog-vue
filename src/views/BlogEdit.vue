@@ -12,7 +12,16 @@
                 </el-form-item>
 
                 <el-form-item label="内容" prop="content">
-                    <mavon-editor v-model="ruleForm.content"></mavon-editor>
+                    <!--                    <mavon-editor v-model="ruleForm.content"></mavon-editor>-->
+                    <tinymce
+                            id="myedit"
+                            ref="editor"
+                            v-model="ruleForm.content"
+                            :disabled="disabled"
+                            @onClick="onClick"
+                    />
+                    <!--                    <button @click="clear">清空内容</button>-->
+                    <!--                    <button @click="disabled = true">禁用</button>-->
                 </el-form-item>
 
                 <el-form-item>
@@ -27,11 +36,28 @@
 
 <script>
   import Header from "../components/Header";
+  import tinymce from '../components/Tinymce'
+  import xss from 'xss'
 
   export default {
     name: "blogEdit.vue",
-    components: {Header},
+    components: {Header, tinymce},
     data() {
+      let validRichText = (rule, value, callback) => {
+        console.log("=============1233")
+        let options = {
+          whiteList: {
+            img: ["src", "title", "target"],
+            p: [],
+            a: ["href"]
+          },
+        };
+        let filterXss = new xss.FilterXSS(options);
+        console.log("filterXss: ", filterXss);
+        let filterContent = filterXss.process(value);
+        console.log("filterContent: ", filterContent);
+        return true;
+      }
       return {
         ruleForm: {
           id: '',
@@ -48,33 +74,66 @@
             {required: true, message: '请输入摘要', trigger: 'blur'}
           ],
           content: [
-            {required: true, message: '请输入内容', trigger: 'blur'}
+            {required: true, message: '请输入内容', validator: validRichText, trigger: 'blur'}
+            // {required: true, message: '请输入内容', trigger: 'blur'}
           ]
-        }
+        },
+        disabled: false,
+        msg: '',
       };
     },
     methods: {
+      // 内容
+      getContent() {
+        console.log('内容', this.msg)
+      },
+      // 鼠标单击的事件
+      onClick(e, editor) {
+        console.log('Element clicked')
+        console.log(e)
+        console.log(editor)
+      },
+      // 清空内容
+      clear() {
+        console.log(this.$refs.editor)
+        this.$refs.editor.clear()
+      },
+      validateContent(content) {
+        console.log("=============content is :", content)
+        let options = {
+          whiteList: {
+            img: ["src", "title", "target"]
+          },
+        };
+        let filterXss = new xss.FilterXSS(options);
+        let filterContent = filterXss.process(content);
+        console.log("=============filterContent is :", filterContent)
+      },
+
       submitForm(formName) {
+        console.log("fromName: ",formName)
         this.$refs[formName].validate((valid) => {
-          if (valid) {
-            const _this = this
-            this.$http.post('/api/blog/edit', this.ruleForm, {
-              headers: {
-                "Authorization": localStorage.getItem("token")
-              }
-            }).then(res => {
-              _this.$alert('操作成功', '提示', {
-                confirmButtonText: '确定',
-                callback: action => {
-                  _this.$router.push("/blogs")
+          try {
+            if (valid) {
+              const _this = this
+              this.$http.post('/api/blog/edit', this.ruleForm, {
+                headers: {
+                  "Authorization": localStorage.getItem("token")
                 }
-              });
-
-            })
-
-          } else {
-            console.log('error submit!!');
-            return false;
+              }).then(res => {
+                _this.$alert('操作成功', '提示', {
+                  confirmButtonText: '确定',
+                  callback: action => {
+                    _this.$router.push("/blogs")
+                  }
+                });
+              })
+            } else {
+              console.log('error submit!!');
+              return false;
+            }
+          } catch (e) {
+            console.log("error is : ", e)
           }
         });
       },
