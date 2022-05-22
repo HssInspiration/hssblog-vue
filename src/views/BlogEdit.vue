@@ -10,26 +10,19 @@
                 <el-form-item label="摘要" prop="description">
                     <el-input type="textarea" v-model="ruleForm.description"></el-input>
                 </el-form-item>
-
                 <el-form-item label="内容" prop="content">
-                    <!--                    <mavon-editor v-model="ruleForm.content"></mavon-editor>-->
                     <tinymce
-                            id="myedit"
+                            id="myEdit"
                             ref="editor"
                             v-model="ruleForm.content"
                             :disabled="disabled"
-                            @onClick="onClick"
                     />
-                    <!--                    <button @click="clear">清空内容</button>-->
-                    <!--                    <button @click="disabled = true">禁用</button>-->
                 </el-form-item>
-
                 <el-form-item>
                     <el-button type="primary" @click="submitForm('ruleForm')">提交</el-button>
                     <el-button @click="resetForm('ruleForm')">重置</el-button>
                 </el-form-item>
             </el-form>
-
         </div>
     </div>
 </template>
@@ -44,19 +37,18 @@
     components: {Header, tinymce},
     data() {
       let validRichText = (rule, value, callback) => {
-        console.log("=============1233")
-        let options = {
-          whiteList: {
-            img: ["src", "title", "target"],
-            p: [],
-            a: ["href"]
-          },
-        };
-        let filterXss = new xss.FilterXSS(options);
-        console.log("filterXss: ", filterXss);
-        let filterContent = filterXss.process(value);
-        console.log("filterContent: ", filterContent);
-        return true;
+        if (!value) {
+          return callback(new Error("内容不能为空"));
+        }
+        if (value.length > 5000) {
+          return callback(new Error("内容不能超过5000字符"));
+        }
+        // 特殊字符校验
+        let pattern = new RegExp("[`~!@#$^*()=|{}'\\[\\].《》]");
+        if (pattern.test(value)) {
+          return callback(new Error("内容不允许包含以下特殊字符：`~!@#$^*()=|{}'\\[\\].《》"));
+        }
+        callback();
       }
       return {
         ruleForm: {
@@ -67,15 +59,14 @@
         },
         rules: {
           title: [
-            {required: true, message: '请输入标题', trigger: 'blur'},
-            {min: 3, max: 25, message: '长度在 3 到 25 个字符', trigger: 'blur'}
+            {required: true, message: '标题不能为空', trigger: 'blur'},
+            {min: 3, max: 25, message: '标题长度在 3 到 25 个字符', trigger: 'blur'}
           ],
           description: [
-            {required: true, message: '请输入摘要', trigger: 'blur'}
+            {required: true, message: '摘要不能为空', trigger: 'blur'}
           ],
           content: [
-            {required: true, message: '请输入内容', validator: validRichText, trigger: 'blur'}
-            // {required: true, message: '请输入内容', trigger: 'blur'}
+            {validator: validRichText, trigger: 'blur'},
           ]
         },
         disabled: false,
@@ -83,57 +74,51 @@
       };
     },
     methods: {
-      // 内容
-      getContent() {
-        console.log('内容', this.msg)
-      },
-      // 鼠标单击的事件
-      onClick(e, editor) {
-        console.log('Element clicked')
-        console.log(e)
-        console.log(editor)
-      },
       // 清空内容
       clear() {
         console.log(this.$refs.editor)
         this.$refs.editor.clear()
       },
-      validateContent(content) {
-        console.log("=============content is :", content)
-        let options = {
-          whiteList: {
-            img: ["src", "title", "target"]
-          },
-        };
-        let filterXss = new xss.FilterXSS(options);
-        let filterContent = filterXss.process(content);
-        console.log("=============filterContent is :", filterContent)
-      },
-
       submitForm(formName) {
-        console.log("fromName: ",formName)
         this.$refs[formName].validate((valid) => {
           try {
             if (valid) {
               const _this = this
+              // 博客内容xss过滤
+              let options = {
+                whiteList: {
+                  img: ["src", "title", "target"],
+                  p: [],
+                  a: ["href"]
+                },
+              };
+              let filterXss = new xss.FilterXSS(options);
+              this.ruleForm.content = filterXss.process(this.ruleForm.content);
               this.$http.post('/api/blog/edit', this.ruleForm, {
                 headers: {
                   "Authorization": localStorage.getItem("token")
                 }
               }).then(res => {
-                _this.$alert('操作成功', '提示', {
-                  confirmButtonText: '确定',
-                  callback: action => {
-                    _this.$router.push("/blogs")
-                  }
-                });
+                if (res && res.code === 0) {
+                  _this.$alert('操作成功', '提示', {
+                    callback: action => {
+                      _this.$router.push("/blogs")
+                    }
+                  });
+                } else {
+                  _this.$alert('操作失败', '警告', {
+                    callback: action => {
+                      _this.$router.push("/blogs")
+                    }
+                  });
+                }
               })
             } else {
-              console.log('error submit!!');
+              this.$alert('操作失败', '警告', {});
               return false;
             }
           } catch (e) {
-            console.log("error is : ", e)
+            this.$alert('操作失败', '警告', {});
           }
         });
       },
@@ -147,7 +132,7 @@
       const _this = this
       if (blogId) {
         this.$http.get('/api/blog/' + blogId).then(res => {
-          const blog = res.data.data
+          const blog = res.data
           _this.ruleForm.id = blog.id
           _this.ruleForm.title = blog.title
           _this.ruleForm.description = blog.description

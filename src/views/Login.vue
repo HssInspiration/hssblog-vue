@@ -63,33 +63,40 @@
         return this.$route.query[paramName];
       },
 
-      register(formName){
+      register(formName) {
         this.$refs[formName].validate(valid => {
           if (valid) {
             const _this = this
-            let uri = "/api/register";;
+            let uri = "/api/register";
             let message = "注册成功";
             this.$http
               .post(uri, _this.ruleForm)
               .then(res => {
-                const token = res.headers["authorization"];
-                _this.$store.commit("SET_TOKEN", token);
-                _this.$store.commit("SET_USER_INFO", res.data.data);
-                // 弹窗异常信息
-                Element.Message({
-                  message: message,
-                  type: 'success',
-                  duration: 3 * 1000
-                })
-                // 注册成功跳转到博客列表首页
-                _this.$router.push("/blogs");
+                console.log("res:", res)
+                if (res.code === 0) {
+                  // 弹窗异常信息
+                  Element.Message({
+                    message: message,
+                    type: 'success',
+                    duration: 3 * 1000
+                  })
+                  // 注册成功跳转到博客列表首页
+                  _this.$router.push("/blogs");
+                } else {
+                  // 弹窗异常信息
+                  Element.Message({
+                    message: "登录失败",
+                    type: 'error',
+                    duration: 3 * 1000
+                  })
+                }
               });
           } else {
             return false;
           }
         });
       },
-      login(formName){
+      login(formName) {
         this.$refs[formName].validate(valid => {
           if (valid) {
             const _this = this
@@ -98,9 +105,6 @@
             this.$http
               .post(uri, _this.ruleForm)
               .then(res => {
-                const token = res.headers["authorization"];
-                _this.$store.commit("SET_TOKEN", token);
-                _this.$store.commit("SET_USER_INFO", res.data.data);
                 // 弹窗异常信息
                 Element.Message({
                   message: message,

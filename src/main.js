@@ -8,15 +8,16 @@ import Element from 'element-ui';
 import 'element-ui/lib/theme-chalk/index.css';
 import mavonEditor from 'mavon-editor'
 import 'mavon-editor/dist/css/index.css'
-// import xss from 'xss'
 
 Vue.use(Element, { size: 'small', zIndex: 3000 });
 Vue.prototype.$http = axios
 Vue.use(mavonEditor)
 // Vue.config.productionTip = false
 
-new Vue({
+let instance = new Vue({
     router,
     store,
     render: h => h(App)
 }).$mount('#app')
+
+export default instance

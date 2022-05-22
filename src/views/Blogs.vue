@@ -47,13 +47,11 @@
         let params = {
           currentPage: currentPage
         }
-        const _this = this
-        _this.$http.get("/api/blogs", {params: params}).then(res => {
-          _this.blogs = res.data.data.records
-          _this.currentPage = res.data.data.current
-          _this.total = res.data.data.total
-          _this.pageSize = res.data.data.size
-
+        this.$http.get("/api/blogs", {params: params}).then(res => {
+          this.blogs = res.data.records
+          this.currentPage = res.data.current
+          this.total = res.data.total
+          this.pageSize = res.data.size
         })
       }
     },

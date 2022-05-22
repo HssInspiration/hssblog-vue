@@ -4,7 +4,7 @@
                 v-model="myValue"
                 :init="init"
                 :disabled="disabled"
-                @click="onClick">
+        >
         </editor>
     </div>
 </template>
@@ -13,7 +13,7 @@
   // 文档 http://tinymce.ax-z.cn/
   // 引入组件
   import tinymce from 'tinymce/tinymce' // tinymce默认hidden，不引入不显示
-  import Editor  from '@tinymce/tinymce-vue'
+  import Editor from '@tinymce/tinymce-vue'
 
   // 引入富文本编辑器主题的js和css
   import 'tinymce/skins/content/default/content.css'
@@ -60,12 +60,11 @@
         default: 'link image'
       },
       toolbar: {
-        type: [String, Array],
         // default: 'bold italic underline strikethrough | fontsizeselect | formatselect | forecolor backcolor | alignleft aligncenter alignright alignjustify | bullist numlist outdent indent blockquote | undo redo | link unlink code lists table image media | removeformat | fullscreen preview'
         default: 'bold italic underline strikethrough alignleft aligncenter alignright alignjustify forecolor | fontsizeselect | formatselect | bullist numlist outdent indent blockquote | undo redo | link unlink code lists table image media'
       }
     },
-    data () {
+    data() {
       return {
         init: {
           language_url: `${this.baseUrl}/tinymce/langs/zh_CN.js`,
@@ -95,27 +94,26 @@
         myValue: this.value
       }
     },
-    mounted () {
+    mounted() {
       console.log(window)
       tinymce.init({})
     },
     methods: {
       // 添加相关的事件，可用的事件参照文档=> https://github.com/tinymce/tinymce-vue => All available events
       // 需要什么事件可以自己增加
-      onClick (e) {
-        this.$emit('onClick', e, tinymce)
-      },
+      // onClick (e) {
+      //   this.$emit('onClick', e, tinymce)
+      // },
       // 可以添加一些自己的自定义事件，如清空内容
-      clear () {
+      clear() {
         this.myValue = ''
       }
     },
     watch: {
-      value (newValue) {
-        // console.log("==========newValue", newValue)
+      value(newValue) {
         this.myValue = newValue
       },
-      myValue (newValue) {
+      myValue(newValue) {
         this.$emit('input', newValue)
       }
     }

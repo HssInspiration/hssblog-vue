@@ -60,23 +60,26 @@
         this.$router.push({path: "/login", query: {isLogin: "1"}});
       },
 
+      // 退出
       logout() {
         const _this = this
-        console.log("localStorage.getItem(\"token\"):" + localStorage.getItem("token"));
         this.$http.get('/api/logout', {
           headers: {
             "Authorization": localStorage.getItem("token")
           }
         }).then((res) => {
           _this.$store.commit('REMOVE_USER_INFO')
+          // 退出后清空登录状态
+          localStorage.clear()
           _this.$router.push('/login')
         });
       }
     },
     created() {
-      if (this.$store.getters.getUser.userName || this.$store.getters.getUser.id) {
-        this.user.userName = this.$store.getters.getUser.userName
-        this.user.avatar = this.$store.getters.getUser.avatar
+      let userInfo = JSON.parse(localStorage.getItem("userInfo"));
+      if (userInfo && (userInfo.userName || userInfo.id)) {
+        this.user.userName = userInfo.userName
+        this.user.avatar = userInfo.avatar
         this.hasLogin = true
       }
     }
